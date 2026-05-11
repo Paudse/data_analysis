@@ -5,11 +5,11 @@ Think of Git work in 5 phases:
 3) Work → 
 4) Review → 
 5) Merge
-
+NOTE:
 1) Start your day: Sync with main branch
 Always begin by updating your local repo.
-git checkout main
-git pull origin main
+TODO: git checkout main
+TODO: git pull origin main
 Why?
 Avoid working on stale code
 Reduce merge conflicts later
@@ -25,12 +25,12 @@ refactor/cache-layer
 chore/update-deps
 
 Create branch:
-git checkout -b feature/my-task-name
+TODO: git checkout -b feature/my-task-name
 You are now isolated from the main branch.
 
 Check branch:
-git branch
-git branch -vv
+TODO: git branch
+TODO: git branch -vv
 
 3) Do the work (daily loop)
 Edit → stage → commit (repeat many times)

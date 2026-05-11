@@ -87,7 +87,7 @@ df = duckdb.sql("""
 select v.model,
 sum(t.miles) as total_miles
 from trips t
-left join vehicles v
+left join vehicles v -- TODO:
 on t.vehicle_id = v.vehicle_id
 group by v.model
 """).df()
