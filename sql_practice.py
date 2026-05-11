@@ -92,3 +92,9 @@ on t.vehicle_id = v.vehicle_id
 group by v.model
 """).df()
 print(df)
+
+df = duckdb.sql("""
+SELECT * FROM sensor_events
+"""
+).df()
+print(df)

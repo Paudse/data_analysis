@@ -35,14 +35,14 @@ TODO: git branch -vv
 3) Do the work (daily loop)
 Edit → stage → commit (repeat many times)
 Check changes:
-git status
-git diff
+TODO: git status
+TODO: git diff
 Stage files:
-git add .
+TODO: git add .
 (or selectively)
-git add file.py
+TODO: git add file.py
 Commit:
-git commit -m "Add validation for email field"
+TODO: git commit -m "Add validation for email field"
 Good commit message style
 Professionals write clear, atomic commits.
 Format often used:
@@ -56,7 +56,7 @@ Rule of thumb:
 One commit = one logical change.
 
 Conventional Commits:
-<type>: <short summary>
+TODO:<type>: <short summary>
 feat: new feature
 fix: bug fix
 refactor: code cleanup
@@ -78,14 +78,14 @@ Keeps history clean
 Avoids messy merge commits
 Resolve conflicts if needed:
 # fix files
-git add .
-git rebase --continue
+TODO: git add .
+TODO: git rebase --continue
 This step is core professional habit.
 
 5) Push your branch to remote
-git push origin feature/my-task-name
+TODO: git push origin feature/my-task-name
 First push usually:
-git push -u origin feature/my-task-name
+TODO: git push -u origin feature/my-task-name
 
 6) Open a Pull Request (PR)
 On GitHub/GitLab/Bitbucket:
@@ -106,9 +106,9 @@ Reviewers will:
 Comment
 Request changes
 You update code and push again:
-git add .
-git commit -m "Address review comments"
-git push
+TODO: git add .
+TODO: git commit -m "Address review comments"
+TODO: git push
 PR auto-updates.
 
 8) Merge the PR
@@ -116,28 +116,28 @@ After approval:
 Squash & merge OR
 Rebase & merge
 Then cleanup locally:
-git checkout main
-git pull origin main
-git branch -d feature/my-task-name
+TODO: git checkout main
+TODO: git pull origin main
+TODO: git branch -d feature/my-task-name
 Branch lifecycle complete 🎉
 
 The Daily Command Cheat Sheet
 These are the commands pros run constantly:
 <Start work>
-git checkout main
-git pull
-git checkout -b feature/x
+TODO: git checkout main
+TODO: git pull
+TODO: git checkout -b feature/x
 <During work>
-git add .
-git commit -m "msg"
-git fetch
-git rebase origin/main
+TODO: git add .
+TODO: git commit -m "msg"
+TODO: git fetch
+TODO: git rebase origin/main
 <Share work>
-git push -u origin branch
+TODO: git push -u origin branch
 <After merge>
-git checkout main
-git pull
-git branch -d branch
+TODO: git checkout main
+TODO: git pull
+TODO: git branch -d branch
 
 Golden Rules of Professional Git
 1) Never commit to main directly Ever.
