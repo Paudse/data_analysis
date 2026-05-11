@@ -1,20 +1,18 @@
 The Professional Git Workflow (day-to-day)
-
 Think of Git work in 5 phases:
+1) Sync → 
+2) Branch → 
+3) Work → 
+4) Review → 
+5) Merge
 
-Sync → 2) Branch → 3) Work → 4) Review → 5) Merge
 1) Start your day: Sync with main branch
-
 Always begin by updating your local repo.
-
 git checkout main
 git pull origin main
-
 Why?
-
 Avoid working on stale code
 Reduce merge conflicts later
-
 Many devs do this every morning.
 
 2) Create a feature branch
@@ -207,3 +205,18 @@ git commit --amend
 Undo staged files:
 
 git reset HEAD file.py
+
+
+
+Conventional Commits:
+<type>: <short summary>
+feat: new feature
+fix: bug fix
+refactor: code cleanup
+test: tests
+docs: documentation
+chore: maintenance
+Example:
+feat: add login API
+fix: handle null pointer crash
+refactor: simplify retry logic
