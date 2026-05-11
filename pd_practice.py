@@ -80,6 +80,18 @@ sensor_events = pd.DataFrame({
 
 print(sensor_events)
 
+for df, col in [
+    (trips, "start_time"),
+    (trips, "end_time"),
+    (disengagements, "timestamp"),
+    (sensor_events, "event_time")
+]:
+    df[col] = pd.to_datetime(df[col])
+
+
 print('=========================================')
 df = trips.merge(disengagements, on="trip_id", how="left")
-print(df)
+print("df:\n", df)
+
+res = (df.groupby("vehicle_id", as_index=False)["miles"])
+print("res:\n", res)
