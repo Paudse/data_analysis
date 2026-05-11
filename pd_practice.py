@@ -1,4 +1,5 @@
 import pandas as pd
+pd.set_option('display.max_columns', None)
 
 vehicles = pd.DataFrame({
     "vehicle_id": [1, 2, 3, 4],
@@ -78,3 +79,7 @@ sensor_events = pd.DataFrame({
 })
 
 print(sensor_events)
+
+print('=========================================')
+df = trips.merge(disengagements, on="trip_id", how="left")
+print(df)

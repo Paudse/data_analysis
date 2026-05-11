@@ -1,6 +1,6 @@
 import duckdb
 import pandas as pd
-
+pd.set_option('display.max_columns', None)
 
 vehicles = pd.DataFrame({
     "vehicle_id": [1, 2, 3, 4],
@@ -80,3 +80,15 @@ sensor_events = pd.DataFrame({
 })
 
 print(sensor_events)
+
+print('=========================================')
+
+df = duckdb.sql("""
+select v.model,
+sum(t.miles) as total_miles
+from trips t
+left join vehicles v
+on t.vehicle_id = v.vehicle_id
+group by v.model
+""").df()
+print(df)
