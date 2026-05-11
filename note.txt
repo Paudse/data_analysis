@@ -1,0 +1,563 @@
+Vehicles
+| vehicle_id | model | release_version |
+--
+Trips
+| trip_id | vehicle_id | start_time | end_time | miles |
+--
+Disengagements
+| disengage_id | trip_id | timestamp | reason |
+--
+SensorEvents
+| event_id | vehicle_id | event_time | event_type |
+event_type ∈ {camera_failure, lidar_failure, radar_failure}
+====================================================================
+1. Total miles per vehicle model
+Return total miles driven per model.
+| model | total_miles |
+--
+select model, sum(ifnull(miles,0)) as total_miles
+from Vehicles v
+left join Trips t
+on v.vehicle_id = t.vehicle_id
+group by model
+====================================================================
+2. Disengagement count per vehicle
+Return number of disengagements per vehicle_id.
+| vehicle_id | diseng_count |
+--
+select v.vehicle_id,
+count(d.disengage_id)
+from Vehicles v
+left join Trips t
+on v.vehicle_id = t.vehicle_id
+left join Disengagements d
+on t.trip_id = d.trip_id
+group by v.vehicle_id
+====================================================================
+⚙️ MEDIUM → REAL INTERVIEW LEVEL
+3. Disengagement rate per trip
+Define:
+disengagement_rate = number of disengagements / number of trips
+Return rate per vehicle_id.
+👉 Test:
+join Trips + Disengagements
+correct granularity (trip-level vs vehicle-level)
+avoid double counting
+--
+| trip_id | diseng_count
+| vehicle_id | diseng_rate |
+--
+
+
+====================================================================
+4. Most failure-prone sensor type
+
+Find which event_type appears most frequently.
+
+👉 Test:
+
+GROUP BY + ORDER BY
+basic ranking intuition
+====================================================================
+5. Vehicle with highest “instability”
+
+Define:
+
+instability = disengagements per 1000 miles
+
+Return top 3 most unstable vehicles.
+
+👉 Test:
+
+ratio calculation
+NULL handling (0 miles edge case)
+ranking (ROW_NUMBER / RANK)
+====================================================================
+🔥 HARD → NVIDIA-STYLE TRICKY
+6. Rolling 7-day disengagement spike detection
+
+Find days where a vehicle has:
+
+more than 3 disengagements in a rolling 7-day window
+
+Return:
+
+vehicle_id, date, disengagement_count_7d
+
+👉 Test:
+
+window functions
+time range filtering
+sliding window 
+====================================================================
+7. Sensor failure → disengagement correlation
+
+Find trips where:
+
+a sensor failure happened within 10 minutes before disengagement
+
+Return matching trip_id.
+
+👉 Test:
+
+time-based join
+event correlation logic
+causal inference style thinking
+====================================================================
+8. Version regression detection (VERY IMPORTANT for NVIDIA)
+
+Compare two software versions:
+
+old < '2024.10'
+new >= '2024.10'
+
+Return:
+
+disengagement rate per version group
+and difference (new - old)
+
+👉 Test:
+
+CASE WHEN grouping
+comparative analytics
+product thinking
+====================================================================
+🧪 EXPERT BONUS (Senior level)
+9. First disengagement per trip
+
+For each trip, return only the first disengagement event.
+
+👉 Test:
+
+ROW_NUMBER()
+partition by trip_id
+====================================================================
+10. “Safety improvement trend”
+
+For each month:
+
+compute disengagement rate per 1000 miles
+show trend over time
+
+👉 Test:
+
+time bucketing
+metric normalization
+trend analysis
+====================================================================
+vehicles
+| vehicle_id | model | release_version |
+tripss
+| trip_id | vehicle_id | start_time | end_time | miles |
+disengagements
+| disengage_id | trip_id | timestamp | reason |
+sensor_events
+| event_id | vehicle_id | event_time | event_type |
+(event_type ∈ camera_failure, lidar_failure, radar_failure)
+-----------------------------
+import pandas as pd
+import numpy as np
+df = trips.merge(vehicles, on="vehicle_id", how="left")
+res = df.groupby("model", as_index = False)["miles"].sum()
+res.rename(columns={"miles";"total_miles"}, inplace=True)
+
+
+
+select vehicle_id,
+event_time,
+lag(event_time) over(partition by vehicle_id order by event_time) as prev_time
+from vehicleevents
+
+case 
+when prev_time is null then 1
+when timestampdiff(minute, prev_time, eventime) > 30 then 1
+else 0
+end as new_trip_flag
+
+sum(new_trip_flag) over(partition by vehicle_id order by event_time) as trip_session_id
+
+select
+vehicle_id,
+trip_session_id,
+min(event_time) as trip_start,
+max(event_time) as trip_end,
+count(*) as evens_in_trip
+from sessionized
+group by vehicle_id, trip_session_id
+order by vehicle_id, trip_start
+
+timestampdiff(minute, min(event), max(event)) as duration_min
+
+
+
+with ordered as(
+    select 
+    vehicle_id,
+    event_time,
+    lag(event) over(partition by vehicle_id order by eventtime) as prev_time
+    from VehicleEvents
+),
+flagged as (
+    select *,
+    case 
+    when prev_time is null then 1
+    when timestampdiff(mintue, prev_time, event_time) > 30 then 1
+    else 0
+    end as new_trip_flag
+    from ordered
+),
+sessionized as (
+    select *,
+    sum(new_trip_flag) over(partition by vehicle_id order by event_time) as trip_session_id
+    from flagged
+),
+trip_table as(
+    select 
+    vehicle_id,
+    trip_session_id,
+    min(event_time) as trip_start_time,
+    max(event_time) as trip_end_time,
+    count(*) as trip_event_count
+    from sessionized
+    group by vehicle_id, trip_seesion_id
+    order by vehicle_id, trip_start
+)
+ifnull(abc,0)
+
+
+with with_prev_time as(
+    select
+    vehicle_id,
+    event_time,
+    lag(event_time) over(partition by vehicle_id order by event_time) as prev_event_time
+    from vehicle_event
+),
+time_gap_flag as(
+    select *
+    case
+    when prev_event_time is null then 1
+    when timestampdiff(minute, prev_event_time, event_time) > 5 then 1
+    else 0
+    end as trip_flag
+    from with_prev_time
+),
+trip_id as(
+    select *,
+    sum(trip_flag) over(partition by vehicle_id order by event_time) as trip_id
+    from time_gap_flag
+),
+trip_summary as(
+    select
+    vehicle_id,
+    trip_id,
+    min(event_time) as trip_start_time,
+    max(event_time) as trip_end_time,
+    count(*) as trip_event_count
+    from tirp_id
+    group by vehicle_id, trip_id
+    order by vehicle_id, trip_id
+),
+trip_summary_more_info as(
+    select *,
+    timestampdiff(minute, trip_start_time, trip_end_time) as trip_duration
+    from trip_summary
+)
+
+select *
+from trip_summary_more_info
+
+with trip_cnt as(
+    select vehicle_id, 
+    count(*) as trip_count
+    from trips
+    group by vehicle_id
+),
+diseng_cnt as(
+    select t.vehicle_id,
+    count(d.disengage_id) as diseng_count
+    from trips t
+    left join disengagements d
+    on t.trip_id = d.trip_id
+    group by t.vehicle_id
+)
+
+select tc.vehicle_id,
+diseng_count * 1.0 / trip_count as diseng_rate 
+from trip_cnt tc
+join diseng_cnt dc
+on tc.vehicle_id = dc.vehicle_id
+
+
+with trip_cnt_per_vehicle as(
+    select vehicle_id,
+    count(trip_id) as trip_cnt
+    from trip
+    group by vehicle_id
+),
+diseng_cnt_per_verhicle as(
+    select vehicle_id,
+    count(d.disengagement_id) as diseng_cnt
+    from trip t
+    left join disengagements d
+    on t.vehicle_id = d.vehicle_id
+    group by t.vehicle_id
+)
+
+select 
+vehicle_id,
+diseng_cnt * 1.0 / trip_cnt as diseng_rate_per_vehicle
+from trip_cnt_per_vehicle tc
+join diseng_cnt_per_verhicle dc
+on tc.vehicle_id = dc.vehicle_id
+
+select 
+event_type,
+count(*) as event_cnt
+from sensorevents
+group by event_type
+order by event_cnt desc
+limit 1
+
+
+
+
+
+with total_miles_per_vehicle as(
+    select 
+    vehicle_id,
+    sum(miles) as total_miles
+ from trips
+ group by vehicle_id
+),
+diseng_cnt_per_vehicle as(
+    select 
+    t.vehicle_id,
+    count(d.disengage_id) as diseng_cnt
+    from trips t
+    left join disengagements d
+    on t.trip_id = d.trip_id
+    group by t.vehicle_id
+)
+
+select
+m.vehicle_id,
+diseng_cnt * 1000.0 / nullif(total_miles,0) as instability
+from total_miles_per_vehicle m
+join diseng_cnt_per_vehicle d
+on m.vehicle_id = d.vehicle_id
+order by instability desc
+limit 3
+
+with daily as
+(
+    select 
+    t.vehicle_id,
+    DATE(d.timestamp) as day,
+    count(*) as diseng_cnt
+    from trips t
+    join disengagements d
+    on t.trip_id = d.trip_id
+    group t.vehicle_id, DATE(d.timestamp)
+)
+select *
+from 
+(select *,
+sum(diseng_cnt) over(partition by vehicle_id order by day range between interval '6 day' preceding and current row) as diseng_7d
+from daily) x
+where diseng_7d > 3
+
+avg(speed) over(partition by vehiclename order by DATE(timestamp) range between 
+interval '7 day' preceding and current row) as avg_speed_7_day
+preceding
+following
+preceding
+
+with daily_diseng_per_vehicle as(
+select
+t.vehicle_id,
+DATE(timestamp) as day,
+count(*) as diseng_cnt
+from trip t
+join disengagement d
+on t.vehicle_id = d.vehicle_id
+group by vehicle_id, DATE(timestamp)
+)
+
+select *
+from
+(select *
+sum(diseng_cnt) over(
+    partition by vehicle_id 
+    order by day 
+range between interval '7 day' preceding and current row
+) as 7_day_diseng_cnt
+from daily_diseng_per_vehicle
+ ) x
+where 7_day_diseng_cnt > 3
+
+avg(speed) over(
+    partition by vehicle
+    order timestamp
+    range between 
+    interval '6 minute' preceding
+    and
+    current row
+)
+
+unbounded preceding
+unbounded following
+current
+range between
+rows between
+range between
+rows between
+
+
+rows()
+
+
+select distinct d.trip_id
+from disengagements d
+join trips t
+on d.trip_id = t.trip_id
+join sensorevents s
+on s.vehicle_id = t.vehicle_id
+and s.event_time between
+d.timestamp - interval '10 minute'
+and d.timestamp
+
+select 
+timestamp,
+vehicle
+d.disen,
+s.event
+for disengagement d
+join sensorevent s
+on d.vehicle = s.vehicle 
+and s.timestamp between d.timestamp - interval "10 minute" and d.timestamp
+
+
+with version_group as(
+    select vehicle_id,
+    case 
+    when release_version < '2024.10' then 'old'
+    else 'new'
+    end as version_group
+    from vehicles
+),
+trip_miles as(
+    select
+    vehicle_id,
+    sum(miles) as miles
+    from trips
+    group by vehicle_id
+),
+diseng_cnt as(
+    select
+    t.vehicle_id,
+    count(*) as diseng
+    from trips t
+    left join disengagement d
+    on t.trip_id = d.trip_id
+    group by t.vehicle_id
+),
+vehicle_metrics as(
+    select 
+    v.version_group,
+    sum(diseng) as total_diseng,
+    sum(miles) as total_miles
+    from version_group v
+    join trip_miles tm using(vehicle_id)
+    join diseng_cnt dc using(vehicle_id)
+    group by version_group
+)
+
+select *,
+total_diseng * 1000.0 / total_miles as disengage_rate_per_1000_miles
+from vehicle_metrics
+
+
+select
+max(case when version_group='new' then diseng_rate end)-
+max(case when version_group='old' then diseng_rate end)
+
+from
+(select
+version_group,
+total_diseng * 1000.0 / total_miles as diseng_rate
+from vehicle_metrics) x
+
+select 
+*
+from 
+(
+select *,
+row_number over(partition by trip_id order by timestamp) as rn
+from disengagements) x
+where rn = 1
+
+
+
+with monthly_miles as(
+    select
+    DATE_Trunc('month', start_time) as month,
+    sum(miles) as miles
+    from trips
+    grout by month
+),
+monthly_diseng as(
+    DATE_TRUNC('month', d.timestamp) as month,
+    count(*) as diseng_cnt
+    from disengagements d
+    group by month
+)
+
+select 
+m.month,
+diseng_cnt * 1000.0 / miles as diseng_per_1k_miles
+from monthly_miles m
+join monthly_diseng d using(month)
+order by month
+
+
+for df,col in [
+    (trips,"start_time"),
+    (trips,"end_time"),
+    (disengagements, "timestamp"),
+    (sensor_events, "event_time")
+]:
+df[col] = pd.to_datetime(df[col])
+
+
+df = trips.merge(vehicles, on="vehice_id", how="left")
+res = (
+    df.groupby("model", as_index=False)["miles"]
+    .sum(
+        .rename(columns={"miles":"total_miles"})
+    )
+)
+
+df = trips.merge(disengagements, on="trip_id", how="left")
+res = (
+    df.groupby("vehicle_id")["disengage_id"]
+    .count()
+    .reset_index(name="diseng_count")
+)
+
+
+trip_cnt = trips.groupby("vehicle_id").size().rename("trip_count")
+
+diseng_cnt = (
+    trips.merge(disengagements, on="trip_id", how="left")
+    .groupby("vehicle_id")["disengage_id"]
+    .count()
+    .rename("diseng_count")
+)
+
+res = (
+    pd.concat([trip_cnt, diseng_cnt], axis=1)
+    .assign(diseng_rate=lambda x: x.diseng_count / x.trip_count)
+    .reset_index()
+)
+
+res =
