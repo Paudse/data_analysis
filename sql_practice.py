@@ -1,4 +1,6 @@
+import duckdb
 import pandas as pd
+
 
 vehicles = pd.DataFrame({
     "vehicle_id": [1, 2, 3, 4],
