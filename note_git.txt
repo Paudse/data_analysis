@@ -1,0 +1,209 @@
+The Professional Git Workflow (day-to-day)
+
+Think of Git work in 5 phases:
+
+Sync → 2) Branch → 3) Work → 4) Review → 5) Merge
+1) Start your day: Sync with main branch
+
+Always begin by updating your local repo.
+
+git checkout main
+git pull origin main
+
+Why?
+
+Avoid working on stale code
+Reduce merge conflicts later
+
+Many devs do this every morning.
+
+2) Create a feature branch
+
+Never work directly on main.
+
+Branch naming usually follows ticket numbers.
+
+Examples:
+
+feature/login-api
+fix/payment-timeout
+refactor/cache-layer
+chore/update-deps
+
+Create branch:
+
+git checkout -b feature/my-task-name
+
+You are now isolated from the main branch.
+
+3) Do the work (daily loop)
+Edit → stage → commit (repeat many times)
+
+Check changes:
+
+git status
+git diff
+
+Stage files:
+
+git add .
+
+(or selectively)
+
+git add file.py
+
+Commit:
+
+git commit -m "Add validation for email field"
+Good commit message style
+
+Professionals write clear, atomic commits.
+
+Format often used:
+
+<type>: short description
+
+Examples:
+feat: add login endpoint
+fix: handle null pointer in parser
+refactor: simplify retry logic
+test: add unit tests for auth service
+
+Rule of thumb:
+One commit = one logical change.
+
+4) Keep your branch up-to-date (VERY important)
+
+While you work, main branch keeps moving.
+
+Every day or two:
+
+git fetch origin
+git rebase origin/main
+
+Why rebase instead of merge?
+
+Keeps history clean
+Avoids messy merge commits
+
+Resolve conflicts if needed:
+
+# fix files
+git add .
+git rebase --continue
+
+This step is core professional habit.
+
+5) Push your branch to remote
+git push origin feature/my-task-name
+
+First push usually:
+
+git push -u origin feature/my-task-name
+6) Open a Pull Request (PR)
+
+On GitHub/GitLab/Bitbucket:
+
+Explain what
+Explain why
+Link ticket
+
+Typical PR description:
+
+## What
+Add email validation to signup API
+
+## Why
+Prevent invalid users from entering system
+
+## Test
+- Unit tests added
+- Manual tested via Postman
+7) Code review cycle
+
+Reviewers will:
+
+Comment
+Request changes
+
+You update code and push again:
+
+git add .
+git commit -m "Address review comments"
+git push
+
+PR auto-updates.
+
+8) Merge the PR
+
+After approval:
+
+Squash & merge OR
+Rebase & merge
+
+Then cleanup locally:
+
+git checkout main
+git pull origin main
+git branch -d feature/my-task-name
+
+Branch lifecycle complete 🎉
+
+The Daily Command Cheat Sheet
+
+These are the commands pros run constantly:
+
+Start work
+git checkout main
+git pull
+git checkout -b feature/x
+During work
+git add .
+git commit -m "msg"
+git fetch
+git rebase origin/main
+Share work
+git push -u origin branch
+After merge
+git checkout main
+git pull
+git branch -d branch
+Golden Rules of Professional Git
+1) Never commit to main directly
+
+Ever.
+
+2) Commit small and often
+
+Huge commits = nightmare reviews.
+
+3) Rebase frequently
+
+Conflicts grow exponentially with time.
+
+4) Write meaningful commit messages
+
+Future you will thank present you.
+
+5) Pull before you push
+
+Avoid breaking CI.
+
+Bonus: Advanced habits senior engineers use
+
+Interactive rebase to clean history:
+
+git rebase -i origin/main
+
+Stash temporary work:
+
+git stash
+git stash pop
+
+Fix last commit:
+
+git commit --amend
+
+Undo staged files:
+
+git reset HEAD file.py
