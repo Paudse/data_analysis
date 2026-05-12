@@ -162,3 +162,46 @@ Undo staged files:
 git reset HEAD file.py
 
 
+情境：最新 commit 壞掉了 → 想回到上一版。
+先講重點：
+👉 可以回上一版
+👉 不一定會刪掉最新版本（看你用哪個指令）
+Git 有 2 大流派：
+安全回退（保留歷史）✅公司常用
+強制回退（改寫歷史）⚠️個人用
+🟢 方法1：安全回到上一版（公司最推薦）
+
+用 revert
+TODO: git revert HEAD
+這個指令做的事：
+產生一個「新的 commit」
+把上一個 commit 的改動全部反向套用
+歷史會變成：
+A --- B --- C (壞掉)
+           ↓
+A --- B --- C --- D (revert C)
+👉 最新壞掉的版本 還在歷史裡
+👉 但程式碼已回到上一版
+公司為什麼愛用？
+不會改寫歷史
+不會害隊友爆炸 💣
+答案：最新版本不會被刪除
+
+🔵 方法2：本地回到上一版（最常用）
+如果你只是本地還沒 push：
+TODO: git reset --soft HEAD~1
+回到上一版，但保留修改在 staging。
+或：
+git reset --mixed HEAD~1
+回到上一版，修改留在 working directory。
+或最狠：
+git reset --hard HEAD~1
+效果：
+A --- B --- C (壞掉)   ❌被砍掉
+↓
+A --- B
+👉 最新 commit 直接消失
+⚠️ 只有在 沒 push 時能安全用！
+
+查看你最近所有 HEAD 去過哪裡
+TODO: git reflog

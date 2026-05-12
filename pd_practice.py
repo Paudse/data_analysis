@@ -95,3 +95,84 @@ print("df:\n", df)
 
 res = (df.groupby("vehicle_id", as_index=False)["miles"])
 print("res:\n", res)
+
+df = trips.merge(vehicles, on = "vehicle_id", how = "left")
+
+res = (
+    df.groupby("model", as_index = False)["miles"]
+    .sum()
+    .rename(columns={"miles":"total_miles"})
+)
+
+print(res)
+
+df = trips.merge(disengagements, on = "trip_id", how = "left")
+
+res = (
+    df.groupby("vehicle_id")["disengage_id"]
+    .count()
+    .reset_index(name="disengage_count")
+)
+print(res)
+
+res = (
+    df.groupby("vehicle_id")["disengage_id"]
+    .count()
+    .reset_index(name="disengage_count")
+)
+
+trip_cnt = trips.groupby("vehicle_id").size().rename("trip_count")
+print(trip_cnt)
+
+diseng_cnt = (
+    trips.merge(disengagements, on = "trip_id", how = "left")
+    .groupby("vehicle_id")["disengage_id"]
+    .count()
+    .rename("diseng_count")
+)
+
+res = (
+    pd.concat([trip_cnt, diseng_cnt], axis=1)
+    .assign(diseng_rate=lambda x: x.diseng_count / x.trip_count)
+    # .reset_index()
+)
+
+print(res)
+
+res = (
+    pd.concat([trip_cnt, diseng_cnt], axis=1)
+    .assign(diseng_rate=lambda x: x.diseng_count / x.trip_count)
+    .reset_index()
+)
+
+print(res)
+
+res = (
+    sensor_events["event_type"]
+    .value_counts()
+    .reset_index(name="count")
+    .rename(columns={"index":"event_type"})
+    .head(1)
+)
+print(res)
+
+miles = trips.groupby("vehicle_id")["miles"].sum()
+diseng = (
+    trips.merge(disengagements, on = "trip_id", how = "left")
+    .groupby("vehicle_id")["disengage_id"]
+    .count()
+)
+
+res = (
+    pd.concat([miles, diseng], axis=1)
+    .rename(columns={"miles":"total_miles","disengage_id":"diseng"})
+    .assign(instability=lambda x: x.diseng*1000/x.total_miles)
+    .sort_values("instability", ascending=False)
+    .head(3)
+    .reset_index()
+)
+
+print(res)
+
+
+
