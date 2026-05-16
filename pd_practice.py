@@ -174,5 +174,36 @@ res = (
 
 print(res)
 
+df = trips.merge(disengagements, on="trip_id")
+df["day"] = df["timestamp"].dt.date
+
+daily = (
+    df.groupby(["vehicle_id","day"])
+    .size()
+    .rename("daily_diseng")
+    .reset_index()
+)
+
+daily["day"] = pd.to_datetime(daily["day"])
+daily = daily.sort_values(["vehicle_id","day"])
+
+daily["diseng_7d"] = (
+    daily.groupby("vehicle_id")
+    .rolling("7D", on="day")["daily_diseng"]
+    .sum()
+    .reset_index(drop=True)
+)
+
+res = daily[daily["diseng_yd"]>3]
+
+df = trips.merge(disengagements, on = "trip_id")
+merged = df.merge(sensor_events, on = "vehicle_id")
+
+res = merged[
+    (merged.event_time <= merged.timestamp) &
+    (merged.event_time >= merged.timestamp - pd.Timedelta(minutes=10))
+]["trip_id"].drop_duplicates()
+
+
 
 
